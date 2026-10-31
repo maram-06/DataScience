@@ -18,7 +18,8 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 | 3 | `Task2_Joud_Violations.ipynb` | Violation features: counts, severity levels, topics, previous visit | `joud_features.csv` |
 | 4 | `Task2_Maram_History.ipynb` | History and calendar features | `maram_features.csv` |
 | 5 | `Extra.ipynb` | Extra analysis: risk level and location (optional) | – |
-| 6 | `Task3_Merge_and_Tests.ipynb` | Merge, quality checks, statistical tests | `food_final.csv` |
+| 6 | `Task3_Merge.ipynb` | Merge and quality checks (incl. outliers) | `food_final.csv` |
+| 7 | `Task3_Tests.ipynb` | Statistical tests (H1a, H1b, H1c, H4, H5) | – |
 
 `food_final.csv` is the final dataset: **one row per real inspection** (Pass, Pass w/ Conditions or Fail), **2015–2022**, 126,787 rows.
 
@@ -67,7 +68,7 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 | Risk | Official risk category of the place (Risk 1 High, 2 Medium, 3 Low) | ➖ (see Risk_Num) |
 | Address, City, State, Zip, Latitude, Longitude, Location | Location of the business | ➖ (Zip possible later) |
 | Inspection Date | Date of the inspection | ➖ |
-| Inspection Type | Canvass, License, Complaint, Re-Inspection, … | ✅ (after grouping / dummies) |
+| Inspection Type | Canvass, License, Complaint, Re-Inspection, … | ➖ (see Inspection_Group) |
 | Results | Pass, Pass w/ Conditions or Fail | 📊 |
 | Violations | Full violation text of the inspection | 📊 |
 | First_Seen_Date | Date of the first inspection of the business in the whole dataset (from 2010) | ➖ (see Days_Since_First_Seen) |
@@ -117,6 +118,7 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 | Is_Reinspection | 1 if the inspection type is a re-inspection | ✅ |
 | Month, Season | Month (1–12) and season of the inspection | ✅ |
 | Facility_Group | 8 most common facility types, the rest "Other" | ✅ (dummies) |
+| Inspection_Group | Inspection type grouped: Canvass, License, Complaint (incl. food poisoning), Other; re-inspections are in Is_Reinspection | ✅ (dummies) |
 | Risk_Num | Risk as a number (1 High, 2 Medium, 3 Low, 0 Unknown) | ✅ |
 | Placebo_Period | Before / after 1 January 2017 (fake change date, for H3) | ➖ (used to split train/test) |
 
@@ -127,4 +129,6 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 - History features are computed from 2015 (Days_Since_First_Seen from 2010), so businesses older than that look newer than they are.
 - Violations are allegations that may be dismissed later; the data does not show this.
 - 2020 is affected by COVID (fewer inspections).
+- Outliers (very long violation lists, long gaps between inspections) were checked with the IQR method and **kept**, because they are real inspections and the long violation lists are part of the change we study (see `Task3_Merge.ipynb`, quality check 5).
 
+AI (Claude) was used to help write, explain and check parts of the code and notes; the authors reviewed and rewrote them.
