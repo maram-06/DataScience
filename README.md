@@ -14,7 +14,7 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 | Order | Notebook | What it does | Output |
 | --- | --- | --- | --- |
 | 1 | `Task1_First_Look.ipynb` | First look at the raw data (size, columns, results per year, periods, violations) | `violations_titles_before.csv`, `violations_titles_after.csv` (already in the repo) |
-| 2 | `Task2_Cleaning.ipynb` | Cleaning rules, Business_ID, target and period columns | `food_clean.csv` |
+| 2 | `Task2_Cleaning.ipynb` | Cleaning rules, Business_ID, target and period columns (keeps 2010–2022 for the history) | `food_clean.csv` |
 | 3 | `Task2_Joud_Violations.ipynb` | Violation features: counts, severity levels, topics, previous visit | `joud_features.csv` |
 | 4 | `Task2_Maram_History.ipynb` | History and calendar features | `maram_features.csv` |
 | 5 | `Extra.ipynb` | Extra analysis: risk level and location (optional) | – |
@@ -34,8 +34,9 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 | 4 | Remove rows without a License # or with License # = 0 | 270,583 |
 | 5 | Missing Facility Type / Risk → "Unknown"; Risk "All" → "Unknown" | 270,583 |
 | 6 | `Business_ID` = License # + business name (1,134 of 43,891 licenses had more than one name) | 270,583 |
-| 7 | Keep 2015–2022 | 126,787 |
-| – | One missing Inspection Type filled as "License Re-Inspection" (same business, two days after a License inspection) | 126,787 |
+| 7 | Keep inspections up to 2022 (2010–2022, so the history columns can use the earlier visits) | (update) |
+| – | One missing Inspection Type in the study years filled as "License Re-Inspection" (same business, two days after a License inspection) | (update) |
+| Task 3 | After the history is calculated, keep the study years 2015–2022 (`Task3_Merge.ipynb`) | 126,787 |
 
 ## Outside information (not in the CSV)
 
@@ -126,7 +127,7 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 
 - The old → new crosswalk is an approximation made by matching titles; the lists are not one-to-one.
 - The new Priority Foundation level covers many more problems than the old Serious level, so severity columns do not mean exactly the same thing before and after 2018.
-- History features are computed from 2015 (Days_Since_First_Seen from 2010), so businesses older than that look newer than they are.
+- History features are computed from 2010, the start of the dataset, so businesses inspected before 2010 still look newer than they are (their first visit in the data is not their real first visit).
 - Violations are allegations that may be dismissed later; the data does not show this.
 - 2020 is affected by COVID (fewer inspections).
 - Outliers (very long violation lists, long gaps between inspections) were checked with the IQR method and **kept**, because they are real inspections and the long violation lists are part of the change we study (see `Task3_Merge.ipynb`, quality check 5).
