@@ -34,8 +34,8 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 | 4 | Remove rows without a License # or with License # = 0 | 270,583 |
 | 5 | Missing Facility Type / Risk → "Unknown"; Risk "All" → "Unknown" | 270,583 |
 | 6 | `Business_ID` = License # + business name (1,134 of 43,891 licenses had more than one name) | 270,583 |
-| 7 | Keep inspections up to 2022 (2010–2022, so the history columns can use the earlier visits) | (update) |
-| – | One missing Inspection Type in the study years filled as "License Re-Inspection" (same business, two days after a License inspection) | (update) |
+| 7 | Keep inspections up to 2022 (2010–2022, so the history columns can use the earlier visits) | 212,463 |
+| – | One missing Inspection Type in the study years filled as "License Re-Inspection" (same business, two days after a License inspection) | 212,463 |
 | Task 3 | After the history is calculated, keep the study years 2015–2022 (`Task3_Merge.ipynb`) | 126,787 |
 
 ## Outside information (not in the CSV)
