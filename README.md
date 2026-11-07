@@ -18,7 +18,7 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 | 3 | `03_Violations.ipynb` | Violation features: counts, severity levels, topics, previous visit | `violation_features.csv` |
 | 4 | `04_History.ipynb` | History and calendar features | `history_features.csv` |
 | 5 | `05_Risk_Location.ipynb` | Extra checks: risk level and location (optional) | – |
-| 6 | `06_Merge.ipynb` | Merge and quality checks (incl. outliers) | `food_final.csv` |
+| 6 | `06_Merge.ipynb` | Merge and quality checks (incl. outliers and distribution shape) | `food_final.csv` |
 | 7 | `07_Tests.ipynb` | Statistical tests (H1a, H1b, H1c, H4, H5) | – |
 
 `food_final.csv` is the final dataset: **one row per real inspection** (Pass, Pass w/ Conditions or Fail), **2015–2022**, 126,787 rows.
@@ -111,8 +111,8 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 | Column | Meaning | Use in model |
 | --- | --- | --- |
 | Prev_Fail | 1 if the business failed its previous inspection | ✅ |
-| First_Inspection | 1 if this is the first inspection of the business in 2015–2022 | ✅ |
-| Days_Since_Last | Days since the previous inspection of the business (first inspections: median, 236) | ✅ |
+| First_Inspection | 1 if this is the first inspection of the business in the whole dataset (since 2010); same information as Num_Past_Inspections = 0 and Days_Since_First_Seen = 0 | ✅ (repeats other columns; we plan to leave it out of the model) |
+| Days_Since_Last | Days since the previous inspection of the business (first inspections have no previous visit, so they are filled with the median, 231 days, not 0) | ✅ |
 | Past_Fail_Rate | Share of earlier inspections of the business that failed | ✅ |
 | Num_Past_Inspections | Number of earlier inspections of the business | ✅ |
 | Days_Since_First_Seen | Days since the first inspection of the business since 2010 (approximate age) | ✅ |
@@ -131,5 +131,8 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 - Violations are allegations that may be dismissed later; the data does not show this.
 - 2020 is affected by COVID (fewer inspections).
 - Outliers (very long violation lists, long gaps between inspections) were checked with the IQR method and **kept**, because they are real inspections and the long violation lists are part of the change we study (see `06_Merge.ipynb`, quality check 5).
+- The numeric columns are right-skewed (see `06_Merge.ipynb`, quality check 6), so we compare them with the median and the Mann–Whitney test instead of the mean and the t-test.
+- The same business is inspected many times, so the inspections are not fully independent. This can make the p-values smaller than they should be, so in `07_Tests.ipynb` we focus on the effect sizes (Cramér's V, rank-biserial).
+- The grace period applied to each business's first inspection after 1 July 2018, not to a fixed date range, so our 90-day "Grace" period is an approximation.
 
 AI (Claude) was used to help write, explain and check parts of the code and notes; the authors reviewed and rewrote them.
