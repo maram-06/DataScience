@@ -1,6 +1,6 @@
 # Generalizability of Food Inspection Risk Models (Chicago)
 
-COM0411 Fundamentals of Data Science – Group project (Gaod & Maram), Phase 1: data preparation and statistical analysis.
+COM0411 Fundamentals of Data Science – Group project, Phase 1: data preparation and statistical analysis.
 
 **Research question:** Does a food-inspection model trained on data from before Chicago's July 2018 food code change still perform well on inspections after the change?
 
@@ -13,17 +13,17 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 
 | Order | Notebook | What it does | Output |
 | --- | --- | --- | --- |
-| 1 | `Task1_First_Look.ipynb` | First look at the raw data (size, columns, results per year, periods, violations) | `violations_titles_before.csv`, `violations_titles_after.csv` (already in the repo) |
-| 2 | `Task2_Cleaning.ipynb` | Cleaning rules, Business_ID, target and period columns (keeps 2010–2022 for the history) | `food_clean.csv` |
-| 3 | `Task2_Joud_Violations.ipynb` | Violation features: counts, severity levels, topics, previous visit | `joud_features.csv` |
-| 4 | `Task2_Maram_History.ipynb` | History and calendar features | `maram_features.csv` |
-| 5 | `Extra.ipynb` | Extra analysis: risk level and location (optional) | – |
-| 6 | `Task3_Merge.ipynb` | Merge and quality checks (incl. outliers) | `food_final.csv` |
-| 7 | `Task3_Tests.ipynb` | Statistical tests (H1a, H1b, H1c, H4, H5) | – |
+| 1 | `01_First_Look.ipynb` | First look at the raw data (size, columns, results per year, periods, violations) | `violations_titles_before.csv`, `violations_titles_after.csv` (already in the repo) |
+| 2 | `02_Cleaning.ipynb` | Cleaning rules, Business_ID, target and period columns (keeps 2010–2022 for the history) | `food_clean.csv` |
+| 3 | `03_Violations.ipynb` | Violation features: counts, severity levels, topics, previous visit | `violation_features.csv` |
+| 4 | `04_History.ipynb` | History and calendar features | `history_features.csv` |
+| 5 | `05_Risk_Location.ipynb` | Extra checks: risk level and location (optional) | – |
+| 6 | `06_Merge.ipynb` | Merge and quality checks (incl. outliers) | `food_final.csv` |
+| 7 | `07_Tests.ipynb` | Statistical tests (H1a, H1b, H1c, H4, H5) | – |
 
 `food_final.csv` is the final dataset: **one row per real inspection** (Pass, Pass w/ Conditions or Fail), **2015–2022**, 126,787 rows.
 
-## Cleaning rules (`Task2_Cleaning.ipynb`)
+## Cleaning rules (`02_Cleaning.ipynb`)
 
 | Rule | What | Rows after |
 | --- | --- | --- |
@@ -36,7 +36,7 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 | 6 | `Business_ID` = License # + business name (1,134 of 43,891 licenses had more than one name) | 270,583 |
 | 7 | Keep inspections up to 2022 (2010–2022, so the history columns can use the earlier visits) | 212,463 |
 | – | One missing Inspection Type in the study years filled as "License Re-Inspection" (same business, two days after a License inspection) | 212,463 |
-| Task 3 | After the history is calculated, keep the study years 2015–2022 (`Task3_Merge.ipynb`) | 126,787 |
+| Merge | After the history is calculated, keep the study years 2015–2022 (`06_Merge.ipynb`) | 126,787 |
 
 ## Outside information (not in the CSV)
 
@@ -77,7 +77,7 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 | **Fail** | **1 = Fail, 0 = Pass or Pass w/ Conditions** | 🎯 |
 | Period | Pre (before 1 Jul 2018), Grace (90 days), Late transition (to 30 Jun 2019), Post | ➖ (used to split train/test) |
 
-### Violation features (`Task2_Joud_Violations.ipynb`)
+### Violation features (`03_Violations.ipynb`)
 
 | Column | Meaning | Use in model |
 | --- | --- | --- |
@@ -106,7 +106,7 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 | Smoking | 70 | 62 |
 | Summary report displayed | 28 | 61 |
 
-### History and calendar features (`Task2_Maram_History.ipynb`)
+### History and calendar features (`04_History.ipynb`)
 
 | Column | Meaning | Use in model |
 | --- | --- | --- |
@@ -130,6 +130,6 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 - History features are computed from 2010, the start of the dataset, so businesses inspected before 2010 still look newer than they are (their first visit in the data is not their real first visit).
 - Violations are allegations that may be dismissed later; the data does not show this.
 - 2020 is affected by COVID (fewer inspections).
-- Outliers (very long violation lists, long gaps between inspections) were checked with the IQR method and **kept**, because they are real inspections and the long violation lists are part of the change we study (see `Task3_Merge.ipynb`, quality check 5).
+- Outliers (very long violation lists, long gaps between inspections) were checked with the IQR method and **kept**, because they are real inspections and the long violation lists are part of the change we study (see `06_Merge.ipynb`, quality check 5).
 
 AI (Claude) was used to help write, explain and check parts of the code and notes; the authors reviewed and rewrote them.
