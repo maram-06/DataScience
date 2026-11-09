@@ -135,4 +135,3 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 - The same business is inspected many times, so the inspections are not fully independent. This can make the p-values smaller than they should be, so in `07_Tests.ipynb` we focus on the effect sizes (Cramér's V, rank-biserial).
 - The grace period applied to each business's first inspection after 1 July 2018, not to a fixed date range, so our 90-day "Grace" period is an approximation.
 
-AI (Claude) was used to help write, explain and check parts of the code and notes; the authors reviewed and rewrote them.
