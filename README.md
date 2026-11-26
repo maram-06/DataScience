@@ -1,8 +1,8 @@
 # Generalizability of Food Inspection Risk Models (Chicago)
 
-COM0411 Fundamentals of Data Science – Group project, Phase 1: data preparation and statistical analysis.
+COM0411 Fundamentals of Data Science – Group project. Phase 1: data preparation and statistical analysis, Phase 2: location feature, model data and classification models.
 
-**Research question:** Does a food-inspection model trained on data from before Chicago's July 2018 food code change still perform well on inspections after the change?
+**Research question:** Does a food-inspection model trained on data from before Chicago's July 2018 food code change still perform well on inspections after the change, and is any drop larger than the normal change over time (placebo date 1 January 2017)?
 
 ## How to use this repository
 
@@ -20,6 +20,9 @@ The raw and processed CSV files are **not** in the repository (they are too larg
 | 5 | `05_Risk_Location.ipynb` | Extra checks: risk level and location (optional) | – |
 | 6 | `06_Merge.ipynb` | Merge and quality checks (incl. outliers and distribution shape) | `food_final.csv` |
 | 7 | `07_Tests.ipynb` | Statistical tests (H1a, H1b, H1c, H4, H5) | – |
+| 8 | `08_Location_Check.ipynb` | Location feature: Zip groups vs. k-means areas (chi-square, Cramér's V); Zip groups chosen | `location_features.csv` |
+| 9 | `09_Model_Data.ipynb` | Model features (no leakage), dummy variables, periods for H2/H3 | `model_data.csv` |
+| 10 | `10_Models.ipynb` | Logistic regression, decision tree, KNN; cross-validation, H2, H3, random split, ROC, confusion matrix, cutoffs | – |
 
 `food_final.csv` is the final dataset: **one row per real inspection** (Pass, Pass w/ Conditions or Fail), **2015–2022**, 126,787 rows.
 
@@ -111,21 +114,45 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 | Column | Meaning | Use in model |
 | --- | --- | --- |
 | Prev_Fail | 1 if the business failed its previous inspection | ✅ |
-| First_Inspection | 1 if this is the first inspection of the business in the whole dataset (since 2010); same information as Num_Past_Inspections = 0 and Days_Since_First_Seen = 0 | ✅ (repeats other columns; we plan to leave it out of the model) |
+| First_Inspection | 1 if this is the first inspection of the business in the whole dataset (since 2010); same information as Num_Past_Inspections = 0 and Days_Since_First_Seen = 0 | ➖ (repeats other columns, left out of the model) |
 | Days_Since_Last | Days since the previous inspection of the business (first inspections have no previous visit, so they are filled with the median, 231 days, not 0) | ✅ |
 | Past_Fail_Rate | Share of earlier inspections of the business that failed | ✅ |
 | Num_Past_Inspections | Number of earlier inspections of the business | ✅ |
 | Days_Since_First_Seen | Days since the first inspection of the business since 2010 (approximate age) | ✅ |
 | Is_Reinspection | 1 if the inspection type is a re-inspection | ✅ |
-| Month, Season | Month (1–12) and season of the inspection | ✅ |
+| Month | Month (1–12) of the inspection | ➖ (Season is used instead) |
+| Season | Season of the inspection | ✅ (dummies) |
 | Facility_Group | 8 most common facility types, the rest "Other" | ✅ (dummies) |
 | Inspection_Group | Inspection type grouped: Canvass, License, Complaint (incl. food poisoning), Other; re-inspections are in Is_Reinspection | ✅ (dummies) |
 | Risk_Num | Risk as a number (1 High, 2 Medium, 3 Low, 0 Unknown) | ✅ |
 | Placebo_Period | Before / after 1 January 2017 (fake change date, for H3) | ➖ (used to split train/test) |
 
+### Location feature (`08_Location_Check.ipynb`)
+
+| Column | Meaning | Use in model |
+| --- | --- | --- |
+| Zip_Group | Chicago Zip code of the business (starts with 606); Zip codes outside Chicago, missing or with fewer than 100 inspections are "Other" (58 groups) | ✅ (dummies) |
+| Location_Cluster | Area from k-means clustering of the coordinates (k = 5, chosen with the elbow method) | ➖ (weaker relation with Fail than Zip: Cramér's V 0.061 vs 0.102) |
+
+### Model data (`model_data.csv`)
+
+126,787 rows; **83 features**: 12 numeric (Prev_Fail, Past_Fail_Rate, Prev_Critical, Prev_Serious, Prev_Num_Violations, Past_Critical_Rate, Past_Serious_Rate, Days_Since_Last, Num_Past_Inspections, Days_Since_First_Seen, Is_Reinspection, Risk_Num) and 71 dummies (8 facility, 3 inspection type, 3 season, 57 Zip; one category dropped per column). Class balance: 22.4% Fail.
+
+## Main results (`10_Models.ipynb`)
+
+Hyperparameters chosen with 5-fold cross-validation: decision tree max_depth = 5, KNN k = 25. Features standardized (scaler fitted on the training data only). Cutoff = fail rate of the training data (0.216 in H2, 0.208 in H3, 0.225 in the random split).
+
+| Model | AUC H2: Pre → Post | AUC H3: before → after 2017 | AUC random split |
+| --- | --- | --- | --- |
+| Logistic regression | 0.690 → 0.643 (−0.048) | 0.705 → 0.648 (−0.057) | 0.675 |
+| Decision tree | 0.674 → 0.647 (−0.027) | 0.681 → 0.671 (−0.010) | 0.671 |
+| KNN | 0.664 → 0.607 (−0.057) | 0.683 → 0.610 (−0.073) | 0.653 |
+
+**H2 supported** (all models are worse after the change), **H3 not supported** (the drop at the placebo date is similar or larger): the loss is mainly ordinary change over time, not an effect of the new food code, so the models should be retrained regularly.
+
 ## Limitations
 
-- The old → new crosswalk is an approximation made by matching titles; the lists are not one-to-one.
+- The old → new crosswalk is an approximation made by matching titles, the lists are not one-to-one.
 - The new Priority Foundation level covers many more problems than the old Serious level, so severity columns do not mean exactly the same thing before and after 2018.
 - History features are computed from 2010, the start of the dataset, so businesses inspected before 2010 still look newer than they are (their first visit in the data is not their real first visit).
 - Violations are allegations that may be dismissed later; the data does not show this.
@@ -134,4 +161,7 @@ Sources: City of Chicago Data Portal – Food Inspections dataset description; C
 - The numeric columns are right-skewed (see `06_Merge.ipynb`, quality check 6), so we compare them with the median and the Mann–Whitney test instead of the mean and the t-test.
 - The same business is inspected many times, so the inspections are not fully independent. This can make the p-values smaller than they should be, so in `07_Tests.ipynb` we focus on the effect sizes (Cramér's V, rank-biserial).
 - The grace period applied to each business's first inspection after 1 July 2018, not to a fixed date range, so our 90-day "Grace" period is an approximation.
+- The dummy variables are also standardized, so in KNN a rare Zip code gets a large distance and can count more than the business's history.
+- We use one random split and one placebo date; the Post period includes COVID-19 and is longer than the placebo test period.
+- The models reach only moderate AUC values (0.61–0.71), so failing inspections are hard to predict even without a rule change.
 
